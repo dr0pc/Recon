@@ -3,8 +3,6 @@
 # Automatizacion de recon de IPS por ICMP y SMB			
 #################################################################
 
-
-
 #Colores
 RED='\033[1;31m'
 GREEN='\033[1;32m'
