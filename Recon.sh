@@ -64,3 +64,31 @@ function ctrl_c(){
 	sleep 1
 	exit 1
 } 
+
+########################################## INICIO DEL SCRIPT ######################################
+for targets in $(cat $1)	#LECTURA DEL CONTENDIO DEL ARCHIVO CON SEGMENTOS IP
+do
+
+	dir=$(echo $targets | tr '/' '_' )	#CONVERSION DE / (1.1.1./24) A _ (1.1.1.1_24) 	
+
+	dirmk=$(ls $dir 2>/dev/null)		#VALIDACION SI EXISTE UN DIRECTORIO CON EL NOMBRE DEL SEGMENTO EJE 10.10.10.10_24
+	if [ "$?" != "0" ]; then		#EN EL CASO QUE NO EXISTA LA CARPETA SE CREA, SI EXISTE UNICAMENTE SE INGRESA 
+		mkdir $dir
+	fi
+	
+
+	cd $dir					#ACCESO AL DIRECOTORIO CON NOMBRE DEL SEGMENTO
+	
+	echo -e "${BLUE}[*] Realizando Recon en $targets un moment plis :3"
+	nmap -sn $targets -oN NMAP_RECON_$dir >/dev/null  2>&1 						#RECON CON NMAP
+	cat NMAP_RECON_$dir|  grep -oP '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | sort -u >> IPS$dir	#EXTRACCION DE IPS DEL OUTPUT NMAP
+	echo -e "${CYAN}    [+] Se encontraron $(wc IPS$dir| awk '{print $1}' ) IPS"
+	sleep 1
+	echo
+	cd ..					#SALIENDO A LA CARPETA PRINCIPAL
+	cat $dir/IPS$dir >> TOTAL_IPS		#CANTIDAD DE IPS ENCONTRADAS EN EL SEGMENTO
+
+done
+	
+echo -e "${PURPLE}[+] Se encontro un total de $(wc TOTAL_IPS| awk '{print $1}' ) IPS"	#TOTAL DE IPS ENCONTRADAS
+
